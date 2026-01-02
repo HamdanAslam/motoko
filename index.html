@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Overengineered HTML Abomination</title>
+
+<style>
+:root {
+  --bg: #0b0f14;
+  --fg: #e6e6e6;
+  --accent: #7c7cff;
+  --glass: rgba(255,255,255,0.08);
+  --blur: blur(14px);
+}
+
+[data-theme="light"] {
+  --bg: #f5f7fb;
+  --fg: #111;
+  --accent: #5a4bff;
+  --glass: rgba(0,0,0,0.06);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, sans-serif;
+  scroll-behavior: smooth;
+}
+
+canvas#bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+}
+
+header {
+  position: sticky;
+  top: 0;
+  backdrop-filter: var(--blur);
+  background: var(--glass);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+header h1 {
+  font-size: 1.2rem;
+}
+
+button {
+  background: var(--accent);
+  border: none;
+  padding: .5rem 1rem;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+}
+
+main {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: auto;
+}
+
+section {
+  margin-bottom: 4rem;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 2rem;
+}
+
+.hero .card {
+  background: var(--glass);
+  backdrop-filter: var(--blur);
+  padding: 2rem;
+  border-radius: 16px;
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+  gap: 1.5rem;
+}
+
+.stat {
+  background: var(--glass);
+  padding: 1.5rem;
+  border-radius: 14px;
+  text-align: center;
+}
+
+.stat span {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.progress {
+  height: 10px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 5px;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.progress div {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  transition: width 1s ease;
+}
+
+.parallax {
+  height: 200px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #7c7cff, #ff7ccf);
+  margin-bottom: 4rem;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal .box {
+  background: var(--bg);
+  padding: 2rem;
+  border-radius: 16px;
+  max-width: 400px;
+}
+
+.modal.show {
+  display: flex;
+}
+
+footer {
+  opacity: .6;
+  text-align: center;
+  padding: 2rem;
+}
+
+@media (max-width: 800px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+
+<header>
+  <h1>Unnecessarily Complex UI</h1>
+  <div>
+    <button id="theme">Toggle Theme</button>
+    <button id="open">Open Modal</button>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="card">
+      <h2>Glassmorphism Card</h2>
+      <p>This thing exists purely to flex CSS filters and waste GPU cycles.</p>
+    </div>
+    <div class="card">
+      <canvas id="chart" width="300" height="200"></canvas>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="stat">
+      <span data-count="1289">0</span>
+      <p>Useless Metric</p>
+      <div class="progress"><div></div></div>
+    </div>
+    <div class="stat">
+      <span data-count="42">0</span>
+      <p>Another One</p>
+      <div class="progress"><div></div></div>
+    </div>
+    <div class="stat">
+      <span data-count="9001">0</span>
+      <p>Over 9000</p>
+      <div class="progress"><div></div></div>
+    </div>
+  </section>
+
+  <div class="parallax" id="parallax"></div>
+</main>
+
+<footer>
+  Built with zero reason and too much time.
+</footer>
+
+<div class="modal" id="modal">
+  <div class="box">
+    <h3>Modal of Doom</h3>
+    <p>This modal does absolutely nothing useful.</p>
+    <button id="close">Close</button>
+  </div>
+</div>
+
+<script>
+/* theme toggle */
+document.getElementById("theme").onclick = () => {
+  document.documentElement.dataset.theme =
+    document.documentElement.dataset.theme === "light" ? "" : "light";
+};
+
+/* modal */
+const modal = document.getElementById("modal");
+document.getElementById("open").onclick = () => modal.classList.add("show");
+document.getElementById("close").onclick = () => modal.classList.remove("show");
+
+/* counters + progress */
+document.querySelectorAll(".stat").forEach(stat => {
+  const span = stat.querySelector("span");
+  const bar = stat.querySelector(".progress div");
+  const target = +span.dataset.count;
+  let i = 0;
+  const tick = setInterval(() => {
+    i += Math.ceil(target / 60);
+    if (i >= target) {
+      i = target;
+      clearInterval(tick);
+    }
+    span.textContent = i;
+    bar.style.width = (i / target * 100) + "%";
+  }, 30);
+});
+
+/* fake chart */
+const c = document.getElementById("chart");
+const ctx = c.getContext("2d");
+ctx.strokeStyle = "#7c7cff";
+ctx.lineWidth = 3;
+ctx.beginPath();
+[20,80,40,120,60,160].forEach((v,i)=>{
+  ctx.lineTo(i*50+20,200-v);
+});
+ctx.stroke();
+
+/* particles bg */
+const canvas = document.getElementById("bg");
+const g = canvas.getContext("2d");
+let w,h;
+function resize(){
+  w = canvas.width = innerWidth;
+  h = canvas.height = innerHeight;
+}
+resize();
+addEventListener("resize", resize);
+
+const particles = Array.from({length:80},()=>({
+  x: Math.random()*w,
+  y: Math.random()*h,
+  r: Math.random()*2+1,
+  dx: Math.random()-.5,
+  dy: Math.random()-.5
+}));
+
+function loop(){
+  g.clearRect(0,0,w,h);
+  particles.forEach(p=>{
+    p.x+=p.dx; p.y+=p.dy;
+    if(p.x<0||p.x>w) p.dx*=-1;
+    if(p.y<0||p.y>h) p.dy*=-1;
+    g.fillStyle="rgba(124,124,255,.6)";
+    g.beginPath();
+    g.arc(p.x,p.y,p.r,0,Math.PI*2);
+    g.fill();
+  });
+  requestAnimationFrame(loop);
+}
+loop();
+
+/* parallax */
+addEventListener("scroll",()=>{
+  const y = scrollY * 0.3;
+  document.getElementById("parallax").style.transform = `translateY(${y}px)`;
+});
+</script>
+
+</body>
+</html>
